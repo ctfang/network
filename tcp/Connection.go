@@ -1,8 +1,8 @@
 package tcp
 
 import (
+	"github.com/ctfang/network"
 	"net"
-	"network"
 	"regexp"
 	"strconv"
 )

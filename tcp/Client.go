@@ -1,10 +1,10 @@
 package tcp
 
 import (
+	"github.com/ctfang/network"
+	"github.com/ctfang/network/protocol"
 	"log"
 	"net"
-	"network"
-	"network/protocol"
 )
 
 type Client struct {

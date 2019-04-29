@@ -1,12 +1,12 @@
 package ws
 
 import (
+	"github.com/ctfang/network"
+	"github.com/ctfang/network/protocol"
+	"github.com/ctfang/network/tcp"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"network"
-	"network/protocol"
-	"network/tcp"
 	"time"
 )
 

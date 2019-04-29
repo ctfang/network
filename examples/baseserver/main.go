@@ -1,8 +1,8 @@
 package main
 
 import (
-	"network"
-	"network/tcp"
+	"github.com/ctfang/network"
+	"github.com/ctfang/network/tcp"
 )
 
 func main() {
