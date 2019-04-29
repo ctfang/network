@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/ctfang/network"
+	"network"
 )
 
 type WsEvent struct {
@@ -26,4 +26,3 @@ func (*WsEvent) OnClose(connect network.Connect) {
 func (*WsEvent) OnError(listen network.ListenTcp, err error) {
 	println("implement me")
 }
-

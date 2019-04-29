@@ -1,9 +1,9 @@
 package protocol
 
 import (
-	"github.com/ctfang/network"
 	"log"
 	"net"
+	"network"
 )
 
 type NothingProtocol struct {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"github.com/ctfang/network"
+	"network"
 )
 
 type baseevent struct {
