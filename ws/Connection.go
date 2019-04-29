@@ -1,8 +1,8 @@
 package ws
 
 import (
-	"network"
 	"bytes"
+	"github.com/ctfang/network"
 	"github.com/gorilla/websocket"
 	"net"
 	"regexp"

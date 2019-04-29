@@ -1,8 +1,8 @@
 package tcp
 
 import (
-	"network"
-	"network/protocol"
+	"github.com/ctfang/network"
+	"github.com/ctfang/network/protocol"
 	"log"
 	"net"
 )

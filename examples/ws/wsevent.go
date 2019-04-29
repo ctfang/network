@@ -1,7 +1,7 @@
 package main
 
 import (
-	"network"
+	"github.com/ctfang/network"
 )
 
 type WsEvent struct {

@@ -1,9 +1,9 @@
 package ws
 
 import (
-	"network"
-	"network/protocol"
-	"network/tcp"
+	"github.com/ctfang/network"
+	"github.com/ctfang/network/protocol"
+	"github.com/ctfang/network/tcp"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"

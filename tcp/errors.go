@@ -1,8 +1,8 @@
 package tcp
 
 import (
-	"network"
 	"fmt"
+	"github.com/ctfang/github.com/ctfang/network"
 )
 
 // 连接失败

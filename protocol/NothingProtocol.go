@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"network"
+	"github.com/ctfang/network"
 	"log"
 	"net"
 )
