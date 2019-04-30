@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"network/tcp"
+	"github.com/ctfang/network/tcp"
 )
 
 func main() {

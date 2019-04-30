@@ -2,7 +2,7 @@ package tcp
 
 import (
 	"fmt"
-	"network"
+	"github.com/ctfang/network"
 )
 
 // 连接失败
