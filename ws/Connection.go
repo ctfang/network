@@ -2,9 +2,9 @@ package ws
 
 import (
 	"bytes"
-	"github.com/ctfang/network"
 	"github.com/gorilla/websocket"
 	"net"
+	"network"
 	"regexp"
 	"strconv"
 	"time"
