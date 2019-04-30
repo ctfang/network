@@ -1,2 +1,4 @@
+github.com/ctfang/network/tcp v0.0.0-20190430030559-c65893f292b0 h1:OSlJiSqTG1hZjIHd5DvTUqVmZqIeJ9/gYmH4NvA7kP4=
+github.com/ctfang/network/tcp v0.0.0-20190430030559-c65893f292b0/go.mod h1:GbnoC1FtoL1pmcixvnC03WhP3e+HOfDCODbUqDEZhZg=
 github.com/gorilla/websocket v1.4.0 h1:WDFjx/TMzVgy9VdMMQi2K2Emtwi2QcUQsztZ/zLaH/Q=
 github.com/gorilla/websocket v1.4.0/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
