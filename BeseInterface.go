@@ -12,6 +12,7 @@ type ListenTcp interface {
 	GetConnectionEvent() Event
 	SetProtocol(protocol Protocol)
 	GetProtocol() Protocol
+	Close()
 	ListenAndServe()
 }
 

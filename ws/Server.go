@@ -15,6 +15,7 @@ type Server struct {
 	address  *network.Address
 	event    network.Event
 	protocol network.Protocol
+	listener *websocket.Conn
 	lastId   uint32
 }
 
@@ -91,6 +92,9 @@ func (server *Server) ListenAndServe() {
 		log.Fatal("websocket 启动失败: ", err)
 	}
 }
+func (server *Server) Close() {
+	_ = server.listener.Close()
+}
 
 func (server *Server) Upgrade(w http.ResponseWriter, r *http.Request) {
 	con, err := server.upgrader.Upgrade(w, r, nil)
@@ -98,7 +102,7 @@ func (server *Server) Upgrade(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-
+	server.listener = con
 	// 信息size上限
 	con.SetReadLimit(maxMessageSize)
 	// 设置底层网络连接的读取截止日期。读取超时后，websocket连接状态已损坏，所有将来的读取都将返回错误。t的零值意味着读取不会超时。

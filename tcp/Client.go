@@ -11,6 +11,7 @@ type Client struct {
 	address  *network.Address
 	event    network.Event
 	protocol network.Protocol
+	con      net.Conn
 	lastId   uint32
 }
 
@@ -45,6 +46,11 @@ func (client *Client) GetProtocol() network.Protocol {
 	return client.protocol
 }
 
+// 主动关闭连接
+func (client *Client) Close() {
+	_ = client.con.Close()
+}
+
 func (client *Client) ListenAndServe() {
 	tcpAddr, err := net.ResolveTCPAddr("tcp4", client.address.Str)
 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
@@ -55,6 +61,7 @@ func (client *Client) ListenAndServe() {
 		log.Printf("tcp client 启动失败, err : %v\n", err.Error())
 		return
 	}
+	client.con = conn
 	client.lastId += 1
 	go event.OnStart(client)
 	client.newConnection(conn)

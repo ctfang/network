@@ -11,6 +11,7 @@ type Server struct {
 	address  *network.Address
 	event    network.Event
 	protocol network.Protocol
+	listener net.Listener
 	lastId   uint32
 }
 
@@ -66,6 +67,11 @@ func (server *Server) GetProtocol() network.Protocol {
 	return server.protocol
 }
 
+// 主动关闭连接
+func (server *Server) Close() {
+	_ = server.listener.Close()
+}
+
 /*
 启动监听
 */
@@ -79,8 +85,8 @@ func (server *Server) ListenAndServe() {
 		log.Fatal("Error starting TCP server.", address.Str, err)
 		return
 	}
-
-	defer listener.Close()
+	server.listener = listener
+	defer server.Close()
 	event.OnStart(server)
 	for {
 		con, _ := listener.Accept()
