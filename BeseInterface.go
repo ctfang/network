@@ -6,27 +6,25 @@ import (
 
 // tcp 服务端 or 客户端监听接口
 type ListenTcp interface {
-	SetAddress(address *Address)
-	GetAddress() *Address
-	SetConnectionEvent(event Event)
-	GetConnectionEvent() Event
-	SetProtocol(protocol Protocol)
-	GetProtocol() Protocol
-	Close()
-	ListenAndServe()
+	SetUrl(address *Url)           // 设置监听地址
+	Url() *Url                     // 地址
+	SetEvent(event Event)          // 设置信息事件
+	Event() Event                  // 信息事件
+	SetProtocol(protocol Protocol) // 设置解析协议
+	Protocol() Protocol            // 协议对象
+	Close()                        // 主动关闭
+	ListenAndServe()               // 启动监听，阻塞
+	SetNewConnect(func(listen ListenTcp, conn net.Conn) Connect)
 }
 
 // 连接实例
 type Connect interface {
 	GetCon() net.Conn
 	Close()
-	GetConnectionId() uint32
+	Id() uint32
 	SetUid(uid string)
-	GetUid() string
+	Uid() string
 	Send(msg interface{}) bool
-	Read() (interface{}, error)
-	SetExtend(extend interface{})
-	GetExtend() interface{}
 	GetIp() uint32
 	GetPort() uint16
 }

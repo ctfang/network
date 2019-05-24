@@ -1,87 +1,99 @@
 package tcp
 
 import (
-	"github.com/ctfang/network"
-	"github.com/ctfang/network/protocol"
+	"github.com/ctfang/network/ws"
 	"log"
 	"net"
 )
 
 type Client struct {
-	address  *network.Address
-	event    network.Event
-	protocol network.Protocol
-	con      net.Conn
-	lastId   uint32
+	ListenTcp
 }
 
-func NewClient() network.ListenTcp {
-	return &Client{}
-}
-
-func (client *Client) SetAddress(address *network.Address) {
-	client.address = address
-}
-
-func (client *Client) GetAddress() *network.Address {
-	return client.address
-}
-
-func (client *Client) SetConnectionEvent(event network.Event) {
-	client.event = event
-}
-
-func (client *Client) GetConnectionEvent() network.Event {
-	return client.event
-}
-
-func (client *Client) SetProtocol(protocol network.Protocol) {
-	client.protocol = protocol
-}
-
-func (client *Client) GetProtocol() network.Protocol {
-	if client.protocol == nil {
-		client.SetProtocol(protocol.NewNewline())
-	}
-	return client.protocol
-}
-
-// 主动关闭连接
-func (client *Client) Close() {
-	_ = client.con.Close()
-}
-
-func (client *Client) ListenAndServe() {
-	tcpAddr, err := net.ResolveTCPAddr("tcp4", client.address.Str)
-	conn, err := net.DialTCP("tcp", nil, tcpAddr)
-	event := client.GetConnectionEvent()
+func (c *Client) ListenAndServe() {
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", c.url.Host)
+	c.conn, err = net.DialTCP("tcp", nil, tcpAddr)
 
 	if err != nil {
-		go event.OnError(client, &ListenError{client.address})
+		go c.event.OnError(c, &ListenError{c.url})
 		log.Printf("tcp client 启动失败, err : %v\n", err.Error())
 		return
 	}
-	client.con = conn
-	client.lastId += 1
-	go event.OnStart(client)
-	client.newConnection(conn)
-}
+	c.id += 1
+	go c.event.OnStart(c)
 
-/*
-新的连接
-*/
-func (client *Client) newConnection(con net.Conn) {
-	var connection = NewConnection(con, client, client.lastId)
-	event := client.GetConnectionEvent()
-	go event.OnConnect(connection)
-	defer event.OnClose(connection)
-
-	for {
-		message, err := connection.Read()
-		if err != nil {
-			con.Close()
-			break
+	if c.newConnect == nil {
+		switch c.Url().Scheme {
+		case "ws":
+			c.newConnect = ws.NewConnect
+		default:
+			c.newConnect = NewConnect
 		}
-		go event.OnMessage(connection, message)
+	}
+	Connect := c.newConnect(c, c.conn)
+	go c.event.OnConnect(Connect)
+	for {
+		data := make([]byte, 1024)
+		count, _ := c.conn.Read(data)
+		log.Println(count)
 	}
 }
+
+//
+// func (client c *Client) Url() *network.Url {
+// 	return client.url
+// }
+// func (client c *Client) Conn() net.Conn {
+// 	return client.conn
+// }
+// func (client c *Client) SetEvent(event network.Event) {
+// 	client.event = event
+// }
+//
+// func (client c *Client) Event() network.Event {
+// 	return client.event
+// }
+//
+// func (client c *Client) SetProtocol(protocol network.Protocol) {
+// 	client.protocol = protocol
+// }
+//
+// // 主动关闭连接
+// func (client c *Client) Close() {
+// 	_ = client.con.Close()
+// }
+//
+// func (client c *Client) ListenAndServe() {
+// 	tcpAddr, err := net.ResolveTCPAddr("tcp4", client.url.Str)
+// 	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+//
+//
+// 	if err != nil {
+// 		go client.event.OnError(client.event, &ListenError{client.url})
+// 		log.Printf("tcp client 启动失败, err : %v\n", err.Error())
+// 		return
+// 	}
+// 	client.conn = conn
+// 	client.id += 1
+// 	go client.event.OnStart(client)
+// 	client.newConnection(conn)
+// }
+//
+// /*
+// 新的连接
+// */
+// func (client c *Client) newConnection(con net.Conn) {
+// 	var connection = NewConnection(con, client, client.lastId)
+// 	event := client.GetConnectionEvent()
+// 	go event.OnConnect(connection)
+// 	defer event.OnClose(connection)
+//
+// 	for {
+// 		message, err := connection.Read()
+// 		if err != nil {
+// 			con.Close()
+// 			break
+// 		}
+// 		go event.OnMessage(connection, message)
+// 	}
+// }

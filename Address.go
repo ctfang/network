@@ -1,39 +1,31 @@
 package network
 
 import (
+	"net/url"
 	"strconv"
 	"strings"
 )
 
-type Address struct {
-	// 监听地址，只包含域名端口
-	Str  string
-	Ip   string
-	Port uint16
-	// 地址，不包含域名端口
-	Path string
+type Url struct {
+	Scheme string
+	Host   string // host or host:port
+	Path   string // path (relative paths may omit leading slash)
+	Ip     string
+	Port   uint16
 }
 
-func NewAddress(addr string) *Address {
-	strS := strings.Split(addr, ":")
-	if len(strS) != 2 {
-		panic("格式错误")
+func NewUrl(addr string) *Url {
+	parse, err := url.Parse(addr)
+	if err != nil {
+		panic("地址格式错误")
 	}
-	Port, _ := strconv.ParseInt(strS[1], 10, 64)
-	index := strings.Index(addr, "/")
-	var pathStr string
-	var Str string
-	if index > 1 {
-		pathStr = addr[index:]
-		Str = addr[:index]
-	} else {
-		pathStr = "/"
-		Str = addr
-	}
-	return &Address{
-		Str:  Str,
-		Ip:   strS[0],
-		Port: uint16(Port),
-		Path: pathStr,
+	arr := strings.Split(parse.Host, ":")
+	port, _ := strconv.Atoi(parse.Port())
+	return &Url{
+		Scheme: parse.Scheme,
+		Host:   parse.Host,
+		Path:   parse.Path,
+		Ip:     arr[0],
+		Port:   uint16(port),
 	}
 }
