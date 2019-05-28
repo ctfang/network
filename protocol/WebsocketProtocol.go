@@ -2,10 +2,13 @@ package protocol
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"github.com/ctfang/network"
+	"math/rand"
 	"net"
+	"time"
 )
 
 type WebsocketProtocol struct {
@@ -15,22 +18,24 @@ type WebsocketProtocol struct {
 	cacheCount int
 }
 
-/*
-GET / HTTP/1.1
-Upgrade: websocket
-Connection: Upgrade
-Host: example.com
-Origin: http://example.com
-Sec-WebSocket-Key: sN9cRrP/n9NdMgdcy2VJFQ==
-Sec-WebSocket-Version: 13
-*/
+func randSeq(l int) []byte {
+	bytes2 := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	var result []byte
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < l; i++ {
+		result = append(result, bytes2[r.Intn(len(bytes2))])
+	}
+	return result
+}
+
 func (w *WebsocketProtocol) AsClient(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
+
 	// 发送请求头
 	strHeader := "GET / HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: "
 	strHeader += conn.RemoteAddr().String() + "\r\n"
 	strHeader += "Origin: http://" + conn.RemoteAddr().String() + "\r\n"
-	strHeader += "Sec-WebSocket-Key:sN9cRrP/n9NdMgdcy2VJFQ==\r\n"
+	strHeader += "Sec-WebSocket-Key:" + base64.StdEncoding.EncodeToString(randSeq(16)) + "\r\n"
 	strHeader += "Sec-WebSocket-Version: 13\r\n\r\n"
 	conn.Write([]byte(strHeader))
 
