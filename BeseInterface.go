@@ -26,7 +26,7 @@ type Connect interface {
 	Id() uint32
 	SetUid(uid string)
 	Uid() string
-	Send(msg interface{}) bool
+	Send(msg []byte) bool
 	GetIp() uint32
 	GetPort() uint16
 }
@@ -55,6 +55,7 @@ type Protocol interface {
 }
 
 type Header interface {
+	Has(key string) bool
 	Get(key string) string
 	Set(data string)
 }

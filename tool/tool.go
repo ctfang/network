@@ -12,3 +12,10 @@ func NewClient(address string) network.ListenTcp {
 	client.SetUrl(network.NewUrl(address))
 	return &client
 }
+
+func NewServer(address string) network.ListenTcp {
+	client := tcp.Server{}
+	client.SetProtocol(&protocol.WebsocketProtocol{})
+	client.SetUrl(network.NewUrl(address))
+	return &client
+}

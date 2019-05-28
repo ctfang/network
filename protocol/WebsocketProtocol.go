@@ -2,10 +2,12 @@ package protocol
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
 	"github.com/ctfang/network"
+	"io"
 	"math/rand"
 	"net"
 	"time"
@@ -16,6 +18,10 @@ type WebsocketProtocol struct {
 	cacheByte []byte
 	// 缓冲长度
 	cacheCount int
+	// 客户端下
+	isClient bool
+	// 掩码
+	maskingKey []byte
 }
 
 func randSeq(l int) []byte {
@@ -30,6 +36,7 @@ func randSeq(l int) []byte {
 
 func (w *WebsocketProtocol) AsClient(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
+	w.isClient = true
 
 	// 发送请求头
 	strHeader := "GET / HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: "
@@ -46,13 +53,40 @@ func (w *WebsocketProtocol) AsClient(conn net.Conn) (network.Header, error) {
 	return &header, err
 }
 
-func (*WebsocketProtocol) AsServer(conn net.Conn) (network.Header, error) {
-	panic("implement me")
+func (w *WebsocketProtocol) AsServer(conn net.Conn) (network.Header, error) {
+	w.cacheByte = make([]byte, 0)
+	w.isClient = false
+
+	// 获取协议头
+	byteHeader, err := w.getHeader(conn)
+	header := Header{}
+	header.Set(string(byteHeader))
+
+	Upgrade := header.Get("Upgrade")
+	if Upgrade != "websocket" {
+		return nil, errors.New("升级的协议不是websocket")
+	}
+
+	guid := "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+	h := sha1.New()
+	_, _ = io.WriteString(h, header.Get("Sec-WebSocket-Key")+guid)
+	accept := make([]byte, 28)
+	base64.StdEncoding.Encode(accept, h.Sum(nil))
+
+	// 返回成功请求头
+	strHeader := "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+	strHeader += "Sec-WebSocket-Accept:" + string(accept) + "\r\n\r\n"
+	conn.Write([]byte(strHeader))
+
+	return &header, err
 }
 
 func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 	// 第一个字节：FIN + RSV1-3 + OPCODE
 	opcodeByte, err := w.readConnOrCache(conn, 1)
+	if err != nil {
+		return nil, err
+	}
 	FIN := opcodeByte[0] >> 7
 	// RSV1 := opcodeByte[0] >> 6 & 1 // 自定义协议
 	// RSV2 := opcodeByte[0] >> 5 & 1 // 自定义协议
@@ -78,13 +112,22 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 	msg := make([]byte, payloadLen)
 	if mask == 0 {
 		// 服务端信息，没有掩码
-		msg, _ = w.readConnOrCache(conn, payloadLen)
+		msg, err = w.readConnOrCache(conn, payloadLen)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		tem, _ := w.readConnOrCache(conn, payloadLen)
 		// 掩码读取
-		maskingByte, _ := w.readConnOrCache(conn, 4)
+		w.maskingKey, err = w.readConnOrCache(conn, 4)
+		if err != nil {
+			return nil, err
+		}
+		payloadDataByte, err := w.readConnOrCache(conn, payloadLen)
+		if err != nil {
+			return nil, err
+		}
 		for i := 0; i < payloadLen; i++ {
-			msg[i] = tem[i+4] ^ maskingByte[i%4]
+			msg[i] = payloadDataByte[i] ^ w.maskingKey[i%4]
 		}
 	}
 
@@ -98,8 +141,40 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 	return msg, err
 }
 
-func (*WebsocketProtocol) Write(msg []byte) []byte {
-	panic("implement me")
+func (w *WebsocketProtocol) Write(msg []byte) []byte {
+	msgLen := len(msg)
+	switch {
+	case msgLen <= 125:
+	case msgLen <= 65535:
+	default:
+
+	}
+
+	sendByte := make([]byte, 0)
+
+	var maskedData []byte
+	if w.maskingKey != nil {
+		maskedData = make([]byte, msgLen)
+		for i := 0; i < msgLen; i++ {
+			maskedData[i] = msg[i] ^ w.maskingKey[i%4]
+		}
+	} else {
+		maskedData = msg
+	}
+	// 0x81 = 16进制 = 129
+	sendByte = append(sendByte, []byte{0x81}...)
+
+	var payLenByte byte
+	if w.maskingKey != nil && len(w.maskingKey) != 4 {
+		payLenByte = byte(0x80) | byte(msgLen)
+		sendByte = append(sendByte, []byte{payLenByte}...)
+		sendByte = append(sendByte, w.maskingKey...)
+	} else {
+		payLenByte = byte(0x00) | byte(msgLen)
+		sendByte = append(sendByte, []byte{payLenByte}...)
+	}
+	sendByte = append(sendByte, msg...)
+	return sendByte
 }
 
 // 读取指定长度数据
@@ -117,7 +192,7 @@ func (w *WebsocketProtocol) readConnOrCache(conn net.Conn, count int) ([]byte, e
 			data := make([]byte, count+512)
 			cacheCount, err := conn.Read(data)
 			if err != nil {
-				return []byte(""), errors.New("读取数据失败")
+				return nil, errors.New("读取数据失败")
 			}
 			w.cacheCount = w.cacheCount + cacheCount
 			w.cacheByte = append(w.cacheByte, data...)
@@ -128,10 +203,10 @@ func (w *WebsocketProtocol) readConnOrCache(conn net.Conn, count int) ([]byte, e
 		data := make([]byte, 1024)
 		cacheCount, err := conn.Read(data)
 		if err != nil {
-			return []byte(""), errors.New("读取数据失败")
+			return nil, errors.New("读取数据失败")
 		}
 		w.cacheCount = cacheCount
-		w.cacheByte = append(w.cacheByte, data...)
+		w.cacheByte = append(w.cacheByte, data[:cacheCount]...)
 		return w.readConnOrCache(conn, count)
 	}
 }
@@ -140,7 +215,7 @@ func (w *WebsocketProtocol) getHeader(conn net.Conn) ([]byte, error) {
 	data := make([]byte, 1024)
 	count, err := conn.Read(data)
 	if err != nil {
-		return []byte(""), errors.New("获取协议头信息错误")
+		return nil, errors.New("获取协议头信息错误")
 	}
 
 	sep := []byte("\r\n\r\n")
@@ -153,6 +228,6 @@ func (w *WebsocketProtocol) getHeader(conn net.Conn) ([]byte, error) {
 		}
 		return data[:index], nil
 	} else {
-		return []byte(""), errors.New("协议头异常，不存在分隔符也不应超过1024位")
+		return nil, errors.New("协议头异常，不存在分隔符也不应超过1024位")
 	}
 }

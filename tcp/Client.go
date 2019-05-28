@@ -41,6 +41,6 @@ func (c *Client) ListenAndServe() {
 			c.event.OnClose(Connect)
 			return
 		}
-		log.Println(string(msg))
+		c.event.OnMessage(Connect, msg)
 	}
 }
