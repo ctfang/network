@@ -7,9 +7,10 @@ import (
 )
 
 type Url struct {
+	Origin string // ws://host:port
 	Scheme string
-	Host   string // host or host:port
-	Path   string // path (relative paths may omit leading slash)
+	Host   string // host:port
+	Path   string // test.go
 	Ip     string
 	Port   uint16
 }
@@ -22,6 +23,7 @@ func NewUrl(addr string) *Url {
 	arr := strings.Split(parse.Host, ":")
 	port, _ := strconv.Atoi(parse.Port())
 	return &Url{
+		Origin: parse.Scheme + "://" + parse.Host,
 		Scheme: parse.Scheme,
 		Host:   parse.Host,
 		Path:   parse.Path,

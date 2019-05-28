@@ -22,7 +22,7 @@ func (*clientevent) OnConnect(connect network.Connect) {
 
 }
 
-func (*clientevent) OnMessage(connect network.Connect, message interface{}) {
+func (*clientevent) OnMessage(connect network.Connect, message []byte) {
 
 }
 

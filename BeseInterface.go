@@ -19,6 +19,8 @@ type ListenTcp interface {
 
 // 连接实例
 type Connect interface {
+	SetHeader(header Header)
+	Header() Header
 	GetCon() net.Conn
 	Close()
 	Id() uint32
@@ -34,7 +36,7 @@ type Event interface {
 	// 新链接
 	OnConnect(connect Connect)
 	// 新信息
-	OnMessage(connect Connect, message interface{})
+	OnMessage(connect Connect, message []byte)
 	// 链接关闭
 	OnClose(connect Connect)
 	// 发送错误
@@ -42,8 +44,17 @@ type Event interface {
 }
 
 type Protocol interface {
+	// 连接后读取，当客户端时使用
+	AsClient(conn net.Conn) (Header, error)
+	// 连接后读取，当服务端时使用
+	AsServer(conn net.Conn) (Header, error)
 	// 读入处理
-	Read(conn net.Conn) (interface{}, error)
+	Read(conn net.Conn) ([]byte, error)
 	// 发送处理
-	Write(msg interface{}) []byte
+	Write(msg []byte) []byte
+}
+
+type Header interface {
+	Get(key string) string
+	Set(data string)
 }

@@ -19,6 +19,10 @@ func (c *Connect) GetPort() uint16 {
 	panic("implement me")
 }
 
+func (c *Connect) Send(msg interface{}) bool {
+	panic("implement me")
+}
+
 func NewConnect(listen network.ListenTcp, conn net.Conn) network.Connect {
 	id = id + 1
 	url := network.NewUrl(listen.Url().Scheme + "://" + listen.Url().Host)

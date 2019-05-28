@@ -11,6 +11,7 @@ type ConnectTcp struct {
 	url    *network.Url
 	conn   net.Conn
 	Listen network.ListenTcp
+	header network.Header
 }
 
 func (c *ConnectTcp) GetCon() net.Conn {
@@ -33,10 +34,13 @@ func (c *ConnectTcp) Uid() string {
 	return c.uid
 }
 
-func (c *ConnectTcp) Send(msg interface{}) bool {
-	panic("implement me")
-}
-
 func (c *ConnectTcp) Url() *network.Url {
 	return c.url
+}
+
+func (c *ConnectTcp) SetHeader(header network.Header) {
+	c.header = header
+}
+func (c *ConnectTcp) Header() network.Header {
+	return c.header
 }
