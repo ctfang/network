@@ -105,7 +105,7 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 		temLen, _ := w.readConnOrCache(conn, 2)
 		payloadLen = int(binary.BigEndian.Uint16(temLen))
 	case 127: // 8个字节表示的一个64位无符合数，这个数用来表示传输数据的长度
-		temLen, _ := w.readConnOrCache(conn, 4)
+		temLen, _ := w.readConnOrCache(conn, 8)
 		payloadLen = int(binary.BigEndian.Uint64(temLen))
 	}
 
@@ -195,7 +195,7 @@ func (w *WebsocketProtocol) readConnOrCache(conn net.Conn, count int) ([]byte, e
 				return nil, errors.New("读取数据失败")
 			}
 			w.cacheCount = w.cacheCount + cacheCount
-			w.cacheByte = append(w.cacheByte, data...)
+			w.cacheByte = append(w.cacheByte, data[:cacheCount]...)
 			return w.readConnOrCache(conn, count)
 		}
 	} else {
