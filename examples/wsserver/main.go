@@ -20,11 +20,12 @@ func (*wsserverevent) OnStart(listen network.ListenTcp) {
 }
 
 func (*wsserverevent) OnConnect(connect network.Connect) {
-
+	connect.Send([]byte("ok"))
 }
 
 func (*wsserverevent) OnMessage(connect network.Connect, message []byte) {
 	log.Println(string(message))
+	connect.Send(message)
 }
 
 func (*wsserverevent) OnClose(connect network.Connect) {

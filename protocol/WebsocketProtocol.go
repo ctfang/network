@@ -21,7 +21,7 @@ type WebsocketProtocol struct {
 	// 客户端下
 	isClient bool
 	// 掩码
-	maskingKey []byte
+	MaskingKey []byte
 }
 
 func randSeq(l int) []byte {
@@ -118,7 +118,7 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 		}
 	} else {
 		// 掩码读取
-		w.maskingKey, err = w.readConnOrCache(conn, 4)
+		maskingKey, err := w.readConnOrCache(conn, 4)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +127,7 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 			return nil, err
 		}
 		for i := 0; i < payloadLen; i++ {
-			msg[i] = payloadDataByte[i] ^ w.maskingKey[i%4]
+			msg[i] = payloadDataByte[i] ^ maskingKey[i%4]
 		}
 	}
 
@@ -143,36 +143,34 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 
 func (w *WebsocketProtocol) Write(msg []byte) []byte {
 	msgLen := len(msg)
+	sendByte := make([]byte, 0)
+
 	switch {
 	case msgLen <= 125:
+		// 0x81 = 16进制 = 129
+		sendByte = append(sendByte, []byte{0x81}...)
 	case msgLen <= 65535:
 	default:
 
 	}
 
-	sendByte := make([]byte, 0)
-
-	var maskedData []byte
-	if w.maskingKey != nil {
-		maskedData = make([]byte, msgLen)
-		for i := 0; i < msgLen; i++ {
-			maskedData[i] = msg[i] ^ w.maskingKey[i%4]
-		}
-	} else {
-		maskedData = msg
-	}
-	// 0x81 = 16进制 = 129
-	sendByte = append(sendByte, []byte{0x81}...)
-
 	var payLenByte byte
-	if w.maskingKey != nil && len(w.maskingKey) != 4 {
+	var maskedData []byte
+	if w.MaskingKey != nil {
 		payLenByte = byte(0x80) | byte(msgLen)
 		sendByte = append(sendByte, []byte{payLenByte}...)
-		sendByte = append(sendByte, w.maskingKey...)
+		sendByte = append(sendByte, w.MaskingKey...)
+
+		maskedData = make([]byte, msgLen)
+		for i := 0; i < msgLen; i++ {
+			maskedData[i] = msg[i] ^ w.MaskingKey[i%4]
+		}
 	} else {
 		payLenByte = byte(0x00) | byte(msgLen)
 		sendByte = append(sendByte, []byte{payLenByte}...)
+		maskedData = msg
 	}
+
 	sendByte = append(sendByte, msg...)
 	return sendByte
 }
