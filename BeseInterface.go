@@ -26,7 +26,7 @@ type Connect interface {
 	Id() uint32
 	SetUid(uid string)
 	Uid() string
-	Send(msg []byte) bool
+	Send(msg interface{}) bool
 	GetIp() uint32
 	GetPort() uint16
 }

@@ -19,8 +19,15 @@ func (c *Connect) GetPort() uint16 {
 	panic("implement me")
 }
 
-func (c *Connect) Send(msg []byte) bool {
-	err := c.Listen.Protocol().Write(c.conn, msg)
+func (c *Connect) Send(msg interface{}) bool {
+	var err error
+	switch msg.(type) {
+	case []byte:
+		err = c.Listen.Protocol().Write(c.conn, msg.([]byte))
+	case string:
+		err = c.Listen.Protocol().Write(c.conn, []byte(msg.(string)))
+	}
+
 	if err != nil {
 		return false
 	}
