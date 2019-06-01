@@ -51,7 +51,7 @@ type Protocol interface {
 	// 读入处理
 	Read(conn net.Conn) ([]byte, error)
 	// 发送处理
-	Write(msg []byte) []byte
+	Write(conn net.Conn, msg []byte) error
 }
 
 type Header interface {

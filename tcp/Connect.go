@@ -20,8 +20,7 @@ func (c *Connect) GetPort() uint16 {
 }
 
 func (c *Connect) Send(msg []byte) bool {
-	sendMsg := c.Listen.Protocol().Write(msg)
-	_, err := c.conn.Write(sendMsg)
+	err := c.Listen.Protocol().Write(c.conn, msg)
 	if err != nil {
 		return false
 	}

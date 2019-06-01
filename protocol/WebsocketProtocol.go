@@ -18,10 +18,8 @@ type WebsocketProtocol struct {
 	cacheByte []byte
 	// 缓冲长度
 	cacheCount int
-	// 客户端下
-	isClient bool
-	// 掩码
-	MaskingKey []byte
+	// 是否启用掩码
+	Mask int
 }
 
 func randSeq(l int) []byte {
@@ -36,7 +34,7 @@ func randSeq(l int) []byte {
 
 func (w *WebsocketProtocol) AsClient(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
-	w.isClient = true
+	w.Mask = 1
 
 	// 发送请求头
 	strHeader := "GET / HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: "
@@ -55,7 +53,7 @@ func (w *WebsocketProtocol) AsClient(conn net.Conn) (network.Header, error) {
 
 func (w *WebsocketProtocol) AsServer(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
-	w.isClient = false
+	w.Mask = 0
 
 	// 获取协议头
 	byteHeader, err := w.getHeader(conn)
@@ -141,38 +139,61 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 	return msg, err
 }
 
-func (w *WebsocketProtocol) Write(msg []byte) []byte {
-	msgLen := len(msg)
+func (w *WebsocketProtocol) Write(conn net.Conn, msg []byte) error {
+	length := len(msg)
 	sendByte := make([]byte, 0)
-
-	switch {
-	case msgLen <= 125:
-		// 0x81 = 16进制 = 129
-		sendByte = append(sendByte, []byte{0x81}...)
-	case msgLen <= 65535:
-	default:
-
-	}
+	sendByte = append(sendByte, []byte{0x81}...)
 
 	var payLenByte byte
-	var maskedData []byte
-	if w.MaskingKey != nil {
-		payLenByte = byte(0x80) | byte(msgLen)
-		sendByte = append(sendByte, []byte{payLenByte}...)
-		sendByte = append(sendByte, w.MaskingKey...)
+	if w.Mask == 1 {
+		switch {
+		case length <= 125:
+			payLenByte = byte(0x80) | byte(length)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+		case length <= 65536:
+			payLenByte = byte(0x80) | byte(0x7e)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+			// 随后的两个字节表示的是一个16进制无符号数，用来表示传输数据的长度
+			payLenByte2 := make([]byte, 2)
+			binary.BigEndian.PutUint16(payLenByte2, uint16(length))
+			sendByte = append(sendByte, payLenByte2...)
+		default:
+			payLenByte = byte(0x80) | byte(0x7f)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+			// 随后的是8个字节表示的一个64位无符合数，这个数用来表示传输数据的长度
+			payLenByte8 := make([]byte, 8)
+			binary.BigEndian.PutUint64(payLenByte8, uint64(length))
+			sendByte = append(sendByte, payLenByte8...)
+		}
+		n := rand.Uint32()
+		MaskingKey := [4]byte{byte(n), byte(n >> 8), byte(n >> 16), byte(n >> 24)}
+		sendByte = append(sendByte, MaskingKey[:]...)
 
-		maskedData = make([]byte, msgLen)
-		for i := 0; i < msgLen; i++ {
-			maskedData[i] = msg[i] ^ w.MaskingKey[i%4]
+		for i := 0; i < length; i++ {
+			msg[i] ^= MaskingKey[i%4]
 		}
 	} else {
-		payLenByte = byte(0x00) | byte(msgLen)
-		sendByte = append(sendByte, []byte{payLenByte}...)
-		maskedData = msg
+		switch {
+		case length <= 125:
+			payLenByte = byte(0x00) | byte(length)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+		case length <= 65536:
+			payLenByte = byte(0x00) | byte(126)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+			payLenByte2 := make([]byte, 2)
+			binary.BigEndian.PutUint16(payLenByte2, uint16(length))
+			sendByte = append(sendByte, payLenByte2...)
+		default:
+			payLenByte = byte(0x00) | byte(127)
+			sendByte = append(sendByte, []byte{payLenByte}...)
+			payLenByte8 := make([]byte, 8)
+			binary.BigEndian.PutUint64(payLenByte8, uint64(length))
+			sendByte = append(sendByte, payLenByte8...)
+		}
 	}
-
 	sendByte = append(sendByte, msg...)
-	return sendByte
+	conn.Write(sendByte)
+	return nil
 }
 
 // 读取指定长度数据
