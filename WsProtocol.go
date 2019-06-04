@@ -1,11 +1,10 @@
-package protocol
+package network
 
 import (
 	"bytes"
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
-	"github.com/ctfang/network"
 	"math/rand"
 	"net"
 )
@@ -22,7 +21,7 @@ func (w *WsProtocol) Init() {
 
 }
 
-func (w *WsProtocol) OnConnect(conn net.Conn) (network.Header, error) {
+func (w *WsProtocol) OnConnect(conn net.Conn) (Header, error) {
 	w.cacheByte = make([]byte, 0)
 
 	// 发送请求头
@@ -35,7 +34,7 @@ func (w *WsProtocol) OnConnect(conn net.Conn) (network.Header, error) {
 
 	// 获取协议头
 	byteHeader, err := w.getHeader(conn)
-	header := Header{}
+	header := MessageHeader{}
 	header.Set(string(byteHeader))
 	return &header, err
 }

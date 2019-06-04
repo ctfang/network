@@ -1,17 +1,16 @@
-package tcp
+package network
 
 import (
-	"github.com/ctfang/network"
 	"net"
 )
 
 var id uint32
 
-type Connect struct {
+type Connection struct {
 	ConnectTcp
 }
 
-func (c *Connect) Send(msg interface{}) bool {
+func (c *Connection) Send(msg interface{}) bool {
 	var err error
 	switch msg.(type) {
 	case []byte:
@@ -26,10 +25,10 @@ func (c *Connect) Send(msg interface{}) bool {
 	return true
 }
 
-func NewConnect(listen network.ListenTcp, conn net.Conn) network.Connect {
+func NewConnect(listen ListenTcp, conn net.Conn) Connect {
 	id = id + 1
-	url := network.NewUrl(listen.Url().Scheme + "://" + listen.Url().Host)
-	return &Connect{
+	url := NewUrl(listen.Url().Scheme + "://" + listen.Url().Host)
+	return &Connection{
 		ConnectTcp: ConnectTcp{
 			id:     id,
 			uid:    "",

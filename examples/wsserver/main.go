@@ -2,12 +2,11 @@ package main
 
 import (
 	"github.com/ctfang/network"
-	"github.com/ctfang/network/tool"
 	"log"
 )
 
 func main() {
-	server := tool.NewServer("ws://127.0.0.1:8080")
+	server := network.NewServer("ws://127.0.0.1:8080")
 	server.SetEvent(&wsserverevent{})
 	server.ListenAndServe()
 }

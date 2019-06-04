@@ -1,8 +1,7 @@
-package protocol
+package network
 
 import (
 	"bytes"
-	"github.com/ctfang/network"
 	"net"
 )
 
@@ -14,7 +13,7 @@ func (t *TextProtocol) Init() {
 	t.delim = '\n'
 }
 
-func (t *TextProtocol) OnConnect(conn net.Conn) (network.Header, error) {
+func (t *TextProtocol) OnConnect(conn net.Conn) (Header, error) {
 	return nil, nil
 }
 

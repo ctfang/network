@@ -1,4 +1,4 @@
-package tcp
+package network
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 )
 
 type Server struct {
-	ListenTcp
+	Listen
 }
 
 /*

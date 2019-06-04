@@ -1,17 +1,16 @@
-package tcp
+package network
 
 import (
-	"github.com/ctfang/network"
 	"net"
 )
 
 type ConnectTcp struct {
 	id     uint32
 	uid    string
-	url    *network.Url
+	url    *Url
 	conn   net.Conn
-	Listen network.ListenTcp
-	header network.Header
+	Listen ListenTcp
+	header Header
 }
 
 func (c *ConnectTcp) GetIp() uint32 {
@@ -42,7 +41,7 @@ func (c *ConnectTcp) Uid() string {
 	return c.uid
 }
 
-func (c *ConnectTcp) Url() *network.Url {
+func (c *ConnectTcp) Url() *Url {
 	return c.url
 }
 
@@ -62,9 +61,9 @@ func (c *ConnectTcp) SendString(msg string) bool {
 	return true
 }
 
-func (c *ConnectTcp) SetHeader(header network.Header) {
+func (c *ConnectTcp) SetHeader(header Header) {
 	c.header = header
 }
-func (c *ConnectTcp) Header() network.Header {
+func (c *ConnectTcp) Header() Header {
 	return c.header
 }

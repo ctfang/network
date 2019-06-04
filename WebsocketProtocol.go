@@ -1,4 +1,4 @@
-package protocol
+package network
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"errors"
-	"github.com/ctfang/network"
 	"io"
 	"math/rand"
 	"net"
@@ -35,12 +34,12 @@ func (w *WebsocketProtocol) Init() {
 
 }
 
-func (w *WebsocketProtocol) OnConnect(conn net.Conn) (network.Header, error) {
+func (w *WebsocketProtocol) OnConnect(conn net.Conn) (Header, error) {
 	w.cacheByte = make([]byte, 0)
 
 	// 获取协议头
 	byteHeader, err := w.getHeader(conn)
-	header := Header{}
+	header := MessageHeader{}
 	header.Set(string(byteHeader))
 
 	Upgrade := header.Get("Upgrade")

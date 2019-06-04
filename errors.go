@@ -1,13 +1,12 @@
-package tcp
+package network
 
 import (
 	"fmt"
-	"github.com/ctfang/network"
 )
 
 // 连接失败
 type ListenError struct {
-	address *network.Url
+	address *Url
 }
 
 func (e *ListenError) Error() string {
