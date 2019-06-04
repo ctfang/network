@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	client := tool.NewServer("ws://127.0.0.1:8080")
-	client.SetEvent(&wsserverevent{})
-	client.ListenAndServe()
+	server := tool.NewServer("ws://127.0.0.1:8080")
+	server.SetEvent(&wsserverevent{})
+	server.ListenAndServe()
 }
 
 type wsserverevent struct {
@@ -20,12 +20,12 @@ func (*wsserverevent) OnStart(listen network.ListenTcp) {
 }
 
 func (*wsserverevent) OnConnect(connect network.Connect) {
-	connect.Send([]byte("ok"))
+	connect.SendString("OnConnect")
 }
 
 func (*wsserverevent) OnMessage(connect network.Connect, message []byte) {
 	log.Println(string(message))
-	connect.Send(message)
+	connect.SendString("OnMessage")
 }
 
 func (*wsserverevent) OnClose(connect network.Connect) {

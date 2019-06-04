@@ -11,21 +11,13 @@ type Connect struct {
 	ConnectTcp
 }
 
-func (c *Connect) GetIp() uint32 {
-	panic("implement me")
-}
-
-func (c *Connect) GetPort() uint16 {
-	panic("implement me")
-}
-
 func (c *Connect) Send(msg interface{}) bool {
 	var err error
 	switch msg.(type) {
 	case []byte:
-		err = c.Listen.Protocol().Write(c.conn, msg.([]byte))
+		return c.SendByte(msg.([]byte))
 	case string:
-		err = c.Listen.Protocol().Write(c.conn, []byte(msg.(string)))
+		return c.SendString(msg.(string))
 	}
 
 	if err != nil {

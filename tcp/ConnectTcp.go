@@ -14,6 +14,14 @@ type ConnectTcp struct {
 	header network.Header
 }
 
+func (c *ConnectTcp) GetIp() uint32 {
+	panic("implement me")
+}
+
+func (c *ConnectTcp) GetPort() uint16 {
+	return c.url.Port
+}
+
 func (c *ConnectTcp) GetCon() net.Conn {
 	return c.conn
 }
@@ -36,6 +44,22 @@ func (c *ConnectTcp) Uid() string {
 
 func (c *ConnectTcp) Url() *network.Url {
 	return c.url
+}
+
+func (c *ConnectTcp) SendByte(msg []byte) bool {
+	err := c.Listen.Protocol().Write(c.conn, msg)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func (c *ConnectTcp) SendString(msg string) bool {
+	err := c.Listen.Protocol().Write(c.conn, []byte(msg))
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func (c *ConnectTcp) SetHeader(header network.Header) {
