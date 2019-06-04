@@ -37,7 +37,7 @@ func (this *Server) ListenAndServe() {
 */
 func (this *Server) newConnection(conn net.Conn) {
 	Connect := this.newConnect(this, conn)
-	header, err := this.protocol.AsServer(conn)
+	header, err := this.protocol.OnConnect(conn)
 	if err != nil {
 		_ = this.conn.Close()
 		go this.event.OnError(this, &ListenError{this.url})

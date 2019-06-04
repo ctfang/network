@@ -25,7 +25,7 @@ func (c *Client) ListenAndServe() {
 		c.newConnect = NewConnect
 	}
 	Connect := c.newConnect(c, c.conn)
-	header, err := c.protocol.AsClient(c.conn)
+	header, err := c.protocol.OnConnect(c.conn)
 	if err != nil {
 		_ = c.conn.Close()
 		go c.event.OnError(c, &ListenError{c.url})

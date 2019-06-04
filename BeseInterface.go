@@ -46,10 +46,8 @@ type Event interface {
 }
 
 type Protocol interface {
-	// 连接后读取，当客户端时使用
-	AsClient(conn net.Conn) (Header, error)
-	// 连接后读取，当服务端时使用
-	AsServer(conn net.Conn) (Header, error)
+	// 第一次连接，通常获取头信息
+	OnConnect(conn net.Conn) (Header, error)
 	// 读入处理
 	Read(conn net.Conn) ([]byte, error)
 	// 发送处理
