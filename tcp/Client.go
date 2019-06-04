@@ -25,6 +25,7 @@ func (c *Client) ListenAndServe() {
 		c.newConnect = NewConnect
 	}
 	Connect := c.newConnect(c, c.conn)
+	c.protocol.Init()
 	header, err := c.protocol.OnConnect(c.conn)
 	if err != nil {
 		_ = c.conn.Close()

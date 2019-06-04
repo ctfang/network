@@ -24,6 +24,7 @@ func (this *Server) ListenAndServe() {
 		this.newConnect = NewConnect
 	}
 	defer this.Close()
+	this.protocol.Init()
 	this.event.OnStart(this)
 	for {
 		con, _ := listener.Accept()

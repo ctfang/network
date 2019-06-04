@@ -46,6 +46,8 @@ type Event interface {
 }
 
 type Protocol interface {
+	// 初始化
+	Init()
 	// 第一次连接，通常获取头信息
 	OnConnect(conn net.Conn) (Header, error)
 	// 读入处理

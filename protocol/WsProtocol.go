@@ -16,13 +16,14 @@ type WsProtocol struct {
 	cacheByte []byte
 	// 缓冲长度
 	cacheCount int
-	// 是否启用掩码
-	Mask int
+}
+
+func (w *WsProtocol) Init() {
+
 }
 
 func (w *WsProtocol) OnConnect(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
-	w.Mask = 1
 
 	// 发送请求头
 	strHeader := "GET / HTTP/1.1\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nHost: "

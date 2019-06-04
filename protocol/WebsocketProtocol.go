@@ -19,8 +19,6 @@ type WebsocketProtocol struct {
 	cacheByte []byte
 	// 缓冲长度
 	cacheCount int
-	// 是否启用掩码
-	Mask int
 }
 
 func randSeq(l int) []byte {
@@ -33,9 +31,12 @@ func randSeq(l int) []byte {
 	return result
 }
 
+func (w *WebsocketProtocol) Init() {
+
+}
+
 func (w *WebsocketProtocol) OnConnect(conn net.Conn) (network.Header, error) {
 	w.cacheByte = make([]byte, 0)
-	w.Mask = 0
 
 	// 获取协议头
 	byteHeader, err := w.getHeader(conn)
