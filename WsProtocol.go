@@ -86,7 +86,7 @@ func (w *WsProtocol) Read(conn net.Conn) ([]byte, error) {
 func (w *WsProtocol) Write(conn net.Conn, msg []byte) error {
 	length := len(msg)
 	sendByte := make([]byte, 0)
-	sendByte = append(sendByte, []byte{0x81}...)
+	sendByte = append(sendByte, []byte{WebsocketMessageType}...)
 
 	var payLenByte byte
 	switch {

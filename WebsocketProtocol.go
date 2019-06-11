@@ -12,6 +12,12 @@ import (
 	"time"
 )
 
+// websocket 协议格式
+var WebsocketMessageType byte = 0x81
+
+// 二进制信息
+const BinaryMessage byte = 0x82
+
 // 服务端websocket协议
 type WebsocketProtocol struct {
 	// 本地缓冲区
@@ -116,7 +122,7 @@ func (w *WebsocketProtocol) Read(conn net.Conn) ([]byte, error) {
 func (w *WebsocketProtocol) Write(conn net.Conn, msg []byte) error {
 	length := len(msg)
 	sendByte := make([]byte, 0)
-	sendByte = append(sendByte, []byte{0x81}...)
+	sendByte = append(sendByte, []byte{WebsocketMessageType}...)
 
 	var payLenByte byte
 	switch {

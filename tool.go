@@ -8,6 +8,8 @@ func NewClient(address string) ListenTcp {
 		client.SetProtocol(&WsProtocol{})
 	case "text":
 		client.SetProtocol(&TextProtocol{})
+	case "pack":
+		client.SetProtocol(&PackageLenProtocol{})
 	default:
 		panic("ws or text")
 	}
@@ -24,8 +26,10 @@ func NewServer(address string) ListenTcp {
 		server.SetProtocol(&WebsocketProtocol{})
 	case "text":
 		server.SetProtocol(&TextProtocol{})
+	case "pack":
+		server.SetProtocol(&PackageLenProtocol{})
 	default:
-		panic("ws or text")
+		panic("ws、text、pack")
 	}
 
 	server.SetUrl(url)
