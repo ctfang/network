@@ -2,9 +2,11 @@ package network
 
 import (
 	"net"
+	"regexp"
 )
 
 type ConnectTcp struct {
+	ip     uint32
 	id     uint32
 	uid    string
 	url    *Url
@@ -14,7 +16,22 @@ type ConnectTcp struct {
 }
 
 func (c *ConnectTcp) GetIp() uint32 {
-	panic("implement me")
+	if c.ip != 0 {
+		return c.ip
+	}
+	ipStr := c.conn.RemoteAddr().String()
+	r := `^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})`
+	reg, err := regexp.Compile(r)
+	if err != nil {
+		return 0
+	}
+	ips := reg.FindStringSubmatch(ipStr)
+	if ips == nil {
+		return 0
+	}
+
+	c.ip = Ip2long(ips[0])
+	return c.ip
 }
 
 func (c *ConnectTcp) GetPort() uint16 {
