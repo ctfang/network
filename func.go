@@ -22,6 +22,19 @@ func Bin2hex(ip uint32, port uint16, id uint32) string {
 	return hex.EncodeToString(msgByte)
 }
 
+// 构建分布式唯一id转换回去
+func DecodeBin2hex(clientId string) (uint32, uint16, uint32) {
+	msgByte, _ := hex.DecodeString(clientId)
+	ip4 := msgByte[0:4]
+	port2 := msgByte[4:6]
+	id4 := msgByte[6:]
+
+	ip := binary.BigEndian.Uint32(ip4)
+	port := binary.BigEndian.Uint16(port2)
+	id := binary.BigEndian.Uint32(id4)
+	return ip, port, id
+}
+
 func Ip2long(ipstr string) (ip uint32) {
 	r := `^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})`
 	reg, err := regexp.Compile(r)
