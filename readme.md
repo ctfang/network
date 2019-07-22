@@ -118,6 +118,41 @@ func main() {
 ````
 </details>
 
+## 扩展
+
+如果需要一些特别的协议格式，也可以创建 `YourProtocol` 协议解析文件进行自定义解析,实现接口 `Protocol`
+
+````go
+type Protocol interface {
+    // 初始化
+    Init()
+    // 第一次连接，通常获取头信息
+    OnConnect(conn net.Conn) (Header, error)
+    // 读入处理
+    Read(conn net.Conn) ([]byte, error)
+    // 发送处理
+    Write(conn net.Conn, msg []byte) error
+}
+````
+
+````go
+type YourProtocol struct {}
+func (*YourProtocol) Init() { /* todo */ }
+func (*YourProtocol) OnConnect(conn net.Conn) (Header, error) { /* todo */ }
+func (*YourProtocol) Read(conn net.Conn) ([]byte, error) { /* todo */ }
+func (*YourProtocol) Write(conn net.Conn, msg []byte) error  { /* todo */ }
+````
+
+使用自定义协议解析
+````go
+
+url := NewUrl(address)
+server := Server{}
+server.SetProtocol(&YourProtocol{})
+server.SetUrl(url)
+server.ListenAndServe()
+````
+
 ## 示例
 
 创建一个测试项目`test` 并且安装 `ctfang/network`
