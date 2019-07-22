@@ -71,7 +71,7 @@ func main() {
 </details>
 
 
-<details open="close">
+<details>
     <summary>text 协议</summary>
     
 就是以回车为分隔的tcp协议，通常用来在命令行测试使用
@@ -95,7 +95,7 @@ func main() {
 </details>
 
 
-<details open="close">
+<details>
     <summary>pack 协议</summary>
 
 自定义协议中常用的格式：包长(4位)+包文
