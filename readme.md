@@ -54,18 +54,18 @@ func (*LogicEvent) OnError(listen network.ListenTcp, err error) {}
     
 ````
 func main() {
-	server := network.NewServer("ws://127.0.0.1:8080")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewServer("ws://127.0.0.1:8080")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 OR
 
 ````
 func main() {
-	server := network.NewClient("ws://127.0.0.1:8080")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewClient("ws://127.0.0.1:8080")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 </details>
@@ -78,18 +78,18 @@ func main() {
 
 ````
 func main() {
-	server := network.NewServer("text://127.0.0.1:8081")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewServer("text://127.0.0.1:8081")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 OR
 
 ````
 func main() {
-	server := network.NewClient("text://127.0.0.1:8081")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewClient("text://127.0.0.1:8081")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 </details>
@@ -102,18 +102,18 @@ func main() {
 
 ````
 func main() {
-	server := network.NewServer("pack://127.0.0.1:8081")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewServer("pack://127.0.0.1:8081")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 OR
 
 ````
 func main() {
-	server := network.NewClient("pack://127.0.0.1:8081")
-	server.SetEvent(&LogicEvent{})
-	server.ListenAndServe()
+    server := network.NewClient("pack://127.0.0.1:8081")
+    server.SetEvent(&LogicEvent{})
+    server.ListenAndServe()
 }
 ````
 </details>
@@ -138,9 +138,9 @@ import (
 )
 
 func main() {
-	server := network.NewServer("ws://127.0.0.1:8080")
-	server.SetEvent(&wsserverevent{})
-	server.ListenAndServe()
+    server := network.NewServer("ws://127.0.0.1:8080")
+    server.SetEvent(&wsserverevent{})
+    server.ListenAndServe()
 }
 
 type wsserverevent struct {
